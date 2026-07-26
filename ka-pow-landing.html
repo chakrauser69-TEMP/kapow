@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KA-POW! — Indie Comics, Delivered</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Archivo+Black&family=Work+Sans:wght@400;600;800&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A;
+    --red:#E8262A;
+    --blue:#1652A1;
+    --yellow:#FFCD05;
+    --paper:#FDFBF3;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+  }
+  .bangers{ font-family:'Bangers', cursive; letter-spacing:0.02em; }
+  .archivo{ font-family:'Archivo Black', sans-serif; }
+  .kalam{ font-family:'Kalam', cursive; }
+  a{ color:inherit; }
+  ::selection{ background:var(--yellow); color:var(--ink); }
+
+  /* halftone texture, reused as the recurring comic-print motif */
+  .halftone{
+    background-image: radial-gradient(var(--ink) 1.1px, transparent 1.3px);
+    background-size: 9px 9px;
+    opacity:0.16;
+  }
+  .halftone.on-color{ opacity:0.14; }
+
+  /* page = the comic page itself, panels sit in a black gutter */
+  .page{
+    background:var(--ink);
+    padding:10px;
+  }
+  @media (min-width:700px){ .page{ padding:18px; } }
+
+  .stack{
+    max-width:1180px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  @media (min-width:700px){ .stack{ gap:16px; } }
+
+  .panel{
+    position:relative;
+    border:5px solid var(--ink);
+    border-radius:4px;
+    background:var(--paper);
+    overflow:hidden;
+  }
+  @media (min-width:700px){ .panel{ border-width:7px; } }
+
+  /* ---------------- nav ---------------- */
+  .nav-panel{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 20px;
+    background:var(--yellow);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .burst-mini{
+    width:38px;height:38px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--red);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+  .brand .burst-mini span{ font-family:'Bangers', cursive; color:var(--paper); font-size:15px; transform:rotate(-8deg); }
+  .brand h1{ font-family:'Bangers', cursive; font-size:26px; margin:0; -webkit-text-stroke:1.4px var(--ink); color:var(--red); letter-spacing:0.03em; }
+  nav.links{ display:flex; gap:8px; flex-wrap:wrap; }
+  nav.links a{
+    font-family:'Archivo Black', sans-serif;
+    font-size:11px;
+    text-transform:uppercase;
+    background:var(--paper);
+    border:3px solid var(--ink);
+    border-radius:6px;
+    padding:7px 12px;
+    text-decoration:none;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  nav.links a:hover{ background:var(--blue); color:var(--paper); transform:translateY(-2px) rotate(-1deg); }
+  @media (max-width:640px){ nav.links{ display:none; } }
+
+  /* ---------------- hero splash ---------------- */
+  .hero-panel{
+    background:var(--blue);
+    min-height:70vh;
+    display:flex;
+    align-items:center;
+    padding:60px 28px;
+  }
+  .hero-panel .halftone{ position:absolute; inset:0; }
+  .hero-inner{ position:relative; z-index:1; max-width:640px; }
+  .hero-kicker{
+    display:inline-block;
+    background:var(--red);
+    color:var(--paper);
+    font-family:'Archivo Black', sans-serif;
+    font-size:12px;
+    padding:6px 14px;
+    border:3px solid var(--ink);
+    border-radius:4px;
+    transform:rotate(-3deg);
+    margin-bottom:18px;
+  }
+  .hero-panel h2{
+    font-family:'Bangers', cursive;
+    color:var(--paper);
+    -webkit-text-stroke: 2.5px var(--ink);
+    font-size:clamp(46px,8vw,92px);
+    line-height:0.95;
+    margin:0 0 20px;
+  }
+  .hero-panel .sub-bubble{
+    position:relative;
+    background:var(--paper);
+    border:4px solid var(--ink);
+    border-radius:20px;
+    padding:16px 20px;
+    max-width:34ch;
+    font-family:'Kalam', cursive;
+    font-size:16px;
+    line-height:1.5;
+    margin-bottom:30px;
+  }
+  .sub-bubble::after{
+    content:'';
+    position:absolute;
+    left:36px; bottom:-18px;
+    width:0; height:0;
+    border:14px solid transparent;
+    border-top-color:var(--paper);
+    filter:drop-shadow(0 3px 0 var(--ink));
+  }
+  .burst-cta{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:190px; height:190px;
+    background:var(--yellow);
+    clip-path: polygon(50% 0%, 61% 32%, 93% 21%, 82% 54%, 100% 75%, 66% 74%, 61% 100%, 43% 78%, 14% 96%, 22% 62%, 0% 42%, 33% 39%);
+    border:none;
+    cursor:pointer;
+    transition: transform 0.2s ease;
+  }
+  .burst-cta:hover{ transform:scale(1.08) rotate(-4deg); }
+  .burst-cta span{
+    font-family:'Bangers', cursive;
+    font-size:22px;
+    color:var(--ink);
+    text-align:center;
+    line-height:1.05;
+    transform:rotate(-6deg);
+  }
+
+  /* ---------------- section headers ---------------- */
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:22px 26px 6px;
+    background:var(--paper);
+  }
+  .section-title .chip{
+    font-family:'Archivo Black', sans-serif;
+    font-size:12px;
+    background:var(--ink);
+    color:var(--yellow);
+    padding:5px 11px;
+    border-radius:4px;
+  }
+  .section-title h3{
+    font-family:'Bangers', cursive;
+    font-size:clamp(26px,3.4vw,36px);
+    color:var(--red);
+    -webkit-text-stroke:1px var(--ink);
+    margin:0;
+  }
+  .section-copy{ padding:0 26px 20px; font-size:14.5px; color:#3a3630; max-width:60ch; line-height:1.6; }
+
+  /* ---------------- issues grid ---------------- */
+  .issues-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+  }
+  @media (max-width:900px){ .issues-grid{ grid-template-columns:repeat(2,1fr); } }
+  .issue{
+    border-top:5px solid var(--ink);
+    border-left:5px solid var(--ink);
+    padding:18px 16px 20px;
+    position:relative;
+  }
+  .issue:nth-child(4n){ }
+  @media (max-width:900px){ .issue:nth-child(odd){ } }
+  .cover{
+    height:150px;
+    border:4px solid var(--ink);
+    border-radius:4px;
+    margin-bottom:12px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+    padding:8px;
+  }
+  .cover .halftone{ position:absolute; inset:0; }
+  .cover .badge{
+    font-family:'Bangers', cursive;
+    background:var(--paper);
+    border:2px solid var(--ink);
+    border-radius:4px;
+    padding:2px 8px;
+    font-size:12px;
+    z-index:1;
+    transform:rotate(-3deg);
+  }
+  .c1{ background:linear-gradient(135deg, var(--red), var(--yellow)); }
+  .c2{ background:linear-gradient(135deg, var(--blue), var(--paper)); }
+  .c3{ background:linear-gradient(135deg, var(--yellow), var(--blue)); }
+  .c4{ background:linear-gradient(135deg, var(--ink), var(--red)); }
+  .issue h4{ font-family:'Bangers', cursive; font-size:19px; margin:0 0 4px; letter-spacing:0.02em; }
+  .issue p{ font-size:12.5px; color:#585048; margin:0 0 10px; line-height:1.5; }
+  .issue .meta{ font-family:'Archivo Black', sans-serif; font-size:9.5px; color:var(--blue); }
+
+  /* ---------------- how it works (comic strip) ---------------- */
+  .strip{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+  }
+  @media (max-width:760px){ .strip{ grid-template-columns:1fr; } }
+  .strip-panel{
+    border-top:5px solid var(--ink);
+    border-left:5px solid var(--ink);
+    padding:26px 22px;
+    position:relative;
+    min-height:220px;
+  }
+  .strip-panel:first-child{ border-left:none; }
+  @media (max-width:760px){ .strip-panel{ border-left:5px solid var(--ink) !important; } }
+  .strip-num{
+    font-family:'Bangers', cursive;
+    font-size:52px;
+    color:var(--paper);
+    -webkit-text-stroke:3px var(--ink);
+    position:absolute;
+    top:6px; right:14px;
+  }
+  .strip-panel h4{ font-family:'Bangers', cursive; font-size:21px; margin:6px 0 8px; max-width:12ch; }
+  .strip-panel p{ font-size:13.5px; line-height:1.6; color:#3a3630; max-width:26ch; }
+  .motion-lines{
+    position:absolute; bottom:16px; left:22px;
+    display:flex; gap:5px;
+  }
+  .motion-lines span{ width:26px; height:3px; background:var(--red); border-radius:2px; }
+  .motion-lines span:nth-child(2){ width:18px; opacity:0.7; }
+  .motion-lines span:nth-child(3){ width:10px; opacity:0.4; }
+
+  /* ---------------- testimonials ---------------- */
+  .testi-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+    padding:6px 26px 30px;
+  }
+  @media (max-width:820px){ .testi-grid{ grid-template-columns:1fr; } }
+  .testi{
+    position:relative;
+    background:var(--yellow);
+    border:4px solid var(--ink);
+    border-radius:18px;
+    padding:18px 18px 16px;
+  }
+  .testi:nth-child(2){ background:var(--paper); }
+  .testi:nth-child(3){ background:var(--red); color:var(--paper); }
+  .testi::after{
+    content:'';
+    position:absolute;
+    left:30px; bottom:-16px;
+    width:0;height:0;
+    border:12px solid transparent;
+    border-top-color:inherit;
+  }
+  .testi:nth-child(1)::after{ border-top-color:var(--yellow); }
+  .testi:nth-child(2)::after{ border-top-color:var(--paper); }
+  .testi:nth-child(3)::after{ border-top-color:var(--red); }
+  .testi p.quote{ font-family:'Kalam', cursive; font-size:15px; line-height:1.55; margin:0 0 12px; }
+  .testi .who{ font-family:'Archivo Black', sans-serif; font-size:10.5px; text-transform:uppercase; }
+
+  /* ---------------- pricing ---------------- */
+  .price-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+  }
+  @media (max-width:820px){ .price-grid{ grid-template-columns:1fr; } }
+  .price{
+    border-top:5px solid var(--ink);
+    border-left:5px solid var(--ink);
+    padding:26px 22px 24px;
+    display:flex;
+    flex-direction:column;
+  }
+  .price:first-child{ border-left:none; }
+  @media (max-width:820px){ .price{ border-left:5px solid var(--ink) !important; } }
+  .price.featured{ background:var(--blue); color:var(--paper); }
+  .price .plan-name{ font-family:'Bangers', cursive; font-size:24px; margin-bottom:2px; }
+  .price .plan-tag{ font-family:'Archivo Black', sans-serif; font-size:10px; text-transform:uppercase; opacity:0.7; margin-bottom:14px; }
+  .price .plan-price{ font-family:'Archivo Black', sans-serif; font-size:34px; margin-bottom:16px; }
+  .price .plan-price span{ font-size:13px; font-family:'Work Sans', sans-serif; font-weight:600; }
+  .price ul{ list-style:none; padding:0; margin:0 0 22px; font-size:13px; line-height:2; }
+  .price ul li::before{ content:'✓ '; font-weight:800; }
+  .price .plan-btn{
+    margin-top:auto;
+    font-family:'Archivo Black', sans-serif;
+    font-size:12px;
+    text-transform:uppercase;
+    padding:12px;
+    text-align:center;
+    border:3px solid currentColor;
+    border-radius:6px;
+    background:transparent;
+    cursor:pointer;
+    color:inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .price:not(.featured) .plan-btn:hover{ background:var(--ink); color:var(--paper); }
+  .price.featured .plan-btn:hover{ background:var(--yellow); color:var(--ink); border-color:var(--yellow); }
+
+  /* ---------------- final splash ---------------- */
+  .final-panel{
+    background:var(--red);
+    padding:70px 28px;
+    text-align:center;
+    position:relative;
+  }
+  .final-panel h2{
+    font-family:'Bangers', cursive;
+    color:var(--paper);
+    -webkit-text-stroke:2.5px var(--ink);
+    font-size:clamp(38px,6vw,68px);
+    margin:0 0 18px;
+  }
+  .final-panel p{ font-family:'Kalam', cursive; color:var(--paper); font-size:16px; margin:0 0 30px; }
+  .final-btn{
+    font-family:'Archivo Black', sans-serif;
+    font-size:15px;
+    text-transform:uppercase;
+    background:var(--yellow);
+    border:4px solid var(--ink);
+    border-radius:10px;
+    padding:16px 34px;
+    cursor:pointer;
+    box-shadow:6px 6px 0 var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .final-btn:hover{ transform:translate(-3px,-3px); box-shadow:9px 9px 0 var(--ink); }
+
+  footer.foot{
+    text-align:center;
+    padding:16px;
+    color:var(--paper);
+    font-family:'Archivo Black', sans-serif;
+    font-size:10px;
+    letter-spacing:0.05em;
+  }
+
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity 0.5s ease, transform 0.5s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="stack">
+
+    <!-- NAV -->
+    <div class="panel nav-panel">
+      <div class="brand">
+        <div class="burst-mini"><span>!</span></div>
+        <h1>KA-POW!</h1>
+      </div>
+      <nav class="links">
+        <a href="#issues">Issues</a>
+        <a href="#how">How it works</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+    </div>
+
+    <!-- HERO -->
+    <div class="panel hero-panel">
+      <div class="halftone" style="background-image:radial-gradient(var(--paper) 1.1px, transparent 1.3px); opacity:0.18;"></div>
+      <div class="hero-inner">
+        <span class="hero-kicker">NEW ISSUES EVERY MONTH</span>
+        <h2>INDIE COMICS,<br>DELIVERED.</h2>
+        <div class="sub-bubble">One box. Four original titles. Zero reprints — every issue is a mockup demo, drawn just for this page!</div>
+        <button class="burst-cta"><span>START<br>READING</span></button>
+      </div>
+    </div>
+
+    <!-- FEATURED ISSUES -->
+    <div class="panel" id="issues">
+      <div class="section-title">
+        <span class="chip">01</span>
+        <h3>This Month's Lineup</h3>
+      </div>
+      <p class="section-copy">Four fictional titles, four different worlds — all mockup covers built for this demo, none of them real books (yet).</p>
+      <div class="issues-grid">
+        <div class="issue">
+          <div class="cover c1"><div class="halftone"></div><span class="badge">VOL. 12</span></div>
+          <h4>BOLT &amp; BRICK</h4>
+          <p>A rookie hero and her sentient toolbox take on the city's worst landlord.</p>
+          <span class="meta">ACTION / COMEDY</span>
+        </div>
+        <div class="issue">
+          <div class="cover c2"><div class="halftone"></div><span class="badge">VOL. 03</span></div>
+          <h4>SIGNAL LOST</h4>
+          <p>A radio operator picks up a broadcast from a city that stopped existing.</p>
+          <span class="meta">SCI-FI / MYSTERY</span>
+        </div>
+        <div class="issue">
+          <div class="cover c3"><div class="halftone"></div><span class="badge">VOL. 07</span></div>
+          <h4>THE LAST UMPIRE</h4>
+          <p>In a league where every game decides the weather, one ump calls it straight.</p>
+          <span class="meta">SPORTS / DRAMA</span>
+        </div>
+        <div class="issue">
+          <div class="cover c4"><div class="halftone"></div><span class="badge">VOL. 21</span></div>
+          <h4>NIGHT SHIFT NULL</h4>
+          <p>A vending-machine repair tech is the only line between downtown and the dark.</p>
+          <span class="meta">HORROR / ACTION</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="panel" id="how">
+      <div class="section-title">
+        <span class="chip">02</span>
+        <h3>How It Works</h3>
+      </div>
+      <div class="strip">
+        <div class="strip-panel">
+          <span class="strip-num">1</span>
+          <h4>Pick your titles</h4>
+          <p>Choose from ongoing series or let us surprise you with a themed monthly mix.</p>
+          <div class="motion-lines"><span></span><span></span><span></span></div>
+        </div>
+        <div class="strip-panel">
+          <span class="strip-num">2</span>
+          <h4>New issue drops</h4>
+          <p>Fresh pages land in your reader every four weeks, digital or in a printed pack.</p>
+          <div class="motion-lines"><span></span><span></span><span></span></div>
+        </div>
+        <div class="strip-panel">
+          <span class="strip-num">3</span>
+          <h4>Read anywhere</h4>
+          <p>Phone, tablet, or the actual paper thing — your library follows you either way.</p>
+          <div class="motion-lines"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS -->
+    <div class="panel" id="reviews">
+      <div class="section-title">
+        <span class="chip">03</span>
+        <h3>Reader Reactions</h3>
+      </div>
+      <div class="testi-grid">
+        <div class="testi">
+          <p class="quote">"I read BOLT &amp; BRICK on my lunch break and now I'm late back every single day."</p>
+          <div class="who">— MOCKUP READER, Vol. 9 subscriber</div>
+        </div>
+        <div class="testi">
+          <p class="quote">"SIGNAL LOST is the first comic that's made me actually scared of a radio."</p>
+          <div class="who">— MOCKUP READER, Vol. 2 subscriber</div>
+        </div>
+        <div class="testi">
+          <p class="quote">"Cancelled two other subscriptions to afford this one. Worth it. Don't tell my wallet."</p>
+          <div class="who">— MOCKUP READER, founding member</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="panel" id="pricing">
+      <div class="section-title">
+        <span class="chip">04</span>
+        <h3>Join The Roster</h3>
+      </div>
+      <div class="price-grid">
+        <div class="price">
+          <div class="plan-name">SIDEKICK</div>
+          <div class="plan-tag">Digital only</div>
+          <div class="plan-price">$6<span>/mo</span></div>
+          <ul>
+            <li>2 issues monthly</li>
+            <li>Reader app access</li>
+            <li>Cancel anytime</li>
+          </ul>
+          <button class="plan-btn">Pick Sidekick</button>
+        </div>
+        <div class="price featured">
+          <div class="plan-name">HERO</div>
+          <div class="plan-tag">Most popular</div>
+          <div class="plan-price">$14<span>/mo</span></div>
+          <ul>
+            <li>4 issues monthly</li>
+            <li>Digital + print pack</li>
+            <li>Early-access drops</li>
+            <li>Backer wall shoutout</li>
+          </ul>
+          <button class="plan-btn">Pick Hero</button>
+        </div>
+        <div class="price">
+          <div class="plan-name">LEGEND</div>
+          <div class="plan-tag">For collectors</div>
+          <div class="plan-price">$28<span>/mo</span></div>
+          <ul>
+            <li>All titles, every format</li>
+            <li>Signed variant covers</li>
+            <li>Studio livestream access</li>
+          </ul>
+          <button class="plan-btn">Pick Legend</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL CTA -->
+    <div class="panel final-panel">
+      <div class="halftone" style="background-image:radial-gradient(var(--paper) 1.1px, transparent 1.3px); opacity:0.16;"></div>
+      <h2>YOUR NEXT<br>OBSESSION AWAITS.</h2>
+      <p>First issue's on us — mockup demo, real good comics.</p>
+      <button class="final-btn">CLAIM FREE ISSUE →</button>
+    </div>
+
+    <footer class="foot">KA-POW! IS A FICTIONAL MOCKUP PRODUCT · ALL TITLES &amp; QUOTES INVENTED FOR THIS DEMO · © 2026</footer>
+
+  </div>
+</div>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('in'), i*30);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.issue, .strip-panel, .testi, .price').forEach(el=>{
+    el.classList.add('reveal');
+    io.observe(el);
+  });
+</script>
+
+</body>
+</html>
